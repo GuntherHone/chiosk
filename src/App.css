@@ -1,0 +1,12 @@
+.App {
+  padding:0px 20px;
+}
+
+.App-ErrorMesssage {
+  background-color: rgb(98,0,0);
+  color:rgb(200,0,0);
+  border:1px solid red;
+  border-radius: 5px;
+  padding:10px;
+  text-align: center;
+}

@@ -23,52 +23,88 @@
             width: 100%;
             height: 100%;
         }
+
+        .overlay {
+            position:fixed;
+            top:0;
+            left:0;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width:100vw;
+            height:100vh;
+            font-size:48px;
+            font-family: arial;
+        }
     </style>
 </head>
 
 <body>
     <div class="app"></div>
+    <div class="overlay"></div>
     <script>
         const { ipcRenderer } = require("electron")
         let app = document.querySelector(".app")
+        let overlay = document.querySelector(".overlay")
         let index = -1
         let timer
         let webviews = []
+        let state = "playing"
 
         function displayNext() {
-            if(index >= 0) {
+            if (index >= 0) {
                 webviews[index].classList.remove("active")
             }
             index = (index + 1) % webviews.length
             webviews[index].classList.add("active")
-            timer = setTimeout(displayNext,webviews[index].dataset.time)
+            if(state === "playing") {
+                timer = setTimeout(displayNext, webviews[index].dataset.time)
+            }
         }
 
         ipcRenderer.on("set_assets", (event, assets) => {
             if (assets.length) {
-                webviews = assets.map(asset => {
+                Promise.all(assets.map(asset => new Promise((resolve, reject) => {
                     let webview = document.createElement("webview")
                     webview.setAttribute("src", asset.url)
                     webview.setAttribute("data-id", asset._id)
                     webview.setAttribute("data-time", asset.time_ms)
                     webview.addEventListener("dom-ready", () => {
                         webview.insertCSS('html,body{overflow:hidden !important;}')
+                        resolve(webview)
                     })
                     app.appendChild(webview)
-                    return webview
-                })
-                index = -1
-                displayNext()
+                })))
+                    .then(allWebViews => {
+                        webviews = allWebViews
+                        index = -1
+                        displayNext()
+                    })
             }
         })
 
-        ipcRenderer.on("pause" ,() => {
+        ipcRenderer.on("pause", () => {
             clearTimeout(timer)
+            state = "paused"
             timer = null
+            overlay.innerHTML = "PAUSED"
         })
 
         ipcRenderer.on("play", () => {
+            state = "playing"
+            overlay.innerHTML = ""
             displayNext()
+        })
+
+        ipcRenderer.on("next", () => {
+            clearTimeout(timer)
+            timer = null
+            displayNext()
+        })
+
+        ipcRenderer.on("getDisplayState", (event) => {
+            event.sender.send("getDisplayState-reply",state)
         })
 
         ipcRenderer.on("new_asset", (event, arg) => {

@@ -1,13 +1,41 @@
 const express = require("express");
 const router = express.Router();
-
-let assets = [
-  { _id: 0, description: "node", url: "https://nodejs.org" },
-  { _id: 1, description: "google", url: "https://www.google.com" }
-];
+const { ipcMain } = require("electron");
 
 router.get("/getAllAssets", (req, res) => {
-  res.send(assets);
+  let assetManager = req.app.get("assetManager");
+  res.send(assetManager.getAssets());
+});
+
+router.post("/pause", (req, res) => {
+  console.log("API: pause");
+  let display = req.app.get("display");
+  display.send("pause");
+  res.send("ACK");
+});
+
+router.post("/play", (req, res) => {
+  console.log("API: play");
+  let display = req.app.get("display");
+  display.send("play");
+  res.send("ACK");
+});
+
+router.post("/next", (req, res) => {
+  console.log("API: next");
+  let display = req.app.get("display");
+  display.send("next");
+  res.send("ACK");
+});
+
+router.get("/getDisplayState", (req, res) => {
+  console.log("API: getDisplayState");
+  let display = req.app.get("display");
+  display.send("getDisplayState");
+  ipcMain.once("getDisplayState-reply", (event, state) => {
+    console.log(`-> getDisplayState ${state}`);
+    res.send(JSON.stringify(state));
+  });
 });
 
 module.exports = router;

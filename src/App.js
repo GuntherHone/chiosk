@@ -14,36 +14,32 @@ class App extends Component {
     }
   };
 
-  getDisplayState = () => {
-    fetch("/api/getDisplayState")
-      .then(this.checkResponse)
-      .then(displayState => this.setState({ displayState }))
-      .catch(({ status, message }) =>
-        this.showError(
-          `getDisplayState:: HTTP response error: ${status}: ${message}`
-        )
-      );
-  };
-
-  componentDidMount() {
-    fetch("/api/getAllAssets")
-      .then(this.checkResponse)
-      .then(assets => this.setState({ assets }))
-      .catch(({ status, message }) =>
-        this.showError(
-          `getAllAssets:: HTTP response error: ${status}: ${message}`
-        )
-      );
-    this.getDisplayState();
-  }
-
-  showError = message => {
-    this.setState({ error: message });
+  showError = (context, code, message) => {
+    this.setState({ error: `${context}:: Error ${code}: ${message}` });
     setTimeout(
       () => this.setState({ error: undefined }),
       ERROR_DISPLAY_TIME_MS
     );
   };
+
+  getDisplayState = () => {
+    fetch("/api/getDisplayState")
+      .then(this.checkResponse)
+      .then(displayState => this.setState({ displayState }))
+      .catch(({ status, message }) =>
+        this.showError("getDisplayState", status, message)
+      );
+  };
+
+  componentDidMount() {
+    Promise.all(
+      ["getAllAssets", "getDisplayState"].map(x => fetch("/api/" + x, {}))
+    )
+      .then(([res1, res2]) => Promise.all([res1.json(), res2.json()]))
+      .then(([assets, displayState]) =>
+        this.setState({ assets, displayState })
+      );
+  }
 
   pause = () => {
     fetch("/api/pause", { method: "POST" }).then(res => this.getDisplayState());
@@ -54,8 +50,8 @@ class App extends Component {
   };
 
   next = () => {
-    fetch("/api/next", { method:"POST"})
-  }
+    fetch("/api/next", { method: "POST" });
+  };
 
   render() {
     return (

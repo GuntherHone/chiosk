@@ -11,21 +11,21 @@ router.post("/pause", (req, res) => {
   console.log("API: pause");
   let display = req.app.get("display");
   display.send("pause");
-  res.send("ACK");
+  res.send(JSON.stringify({status:"ok"}));
 });
 
 router.post("/play", (req, res) => {
   console.log("API: play");
   let display = req.app.get("display");
   display.send("play");
-  res.send("ACK");
+  res.send(JSON.stringify({status:"ok"}));
 });
 
 router.post("/next", (req, res) => {
   console.log("API: next");
   let display = req.app.get("display");
   display.send("next");
-  res.send("ACK");
+  res.send(JSON.stringify({status:"ok"}));
 });
 
 router.get("/getDisplayState", (req, res) => {

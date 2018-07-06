@@ -42,11 +42,15 @@ class App extends Component {
   }
 
   pause = () => {
-    fetch("/api/pause", { method: "POST" }).then(res => this.getDisplayState());
+    fetch("/api/pause", { method: "POST" })
+    .then(res => res.json())
+    .then(_ => this.getDisplayState());
   };
 
   play = () => {
-    fetch("/api/play", { method: "POST" }).then(res => this.getDisplayState());
+    fetch("/api/play", { method: "POST" })
+    .then(res => res.json())
+    .then(_ => this.getDisplayState());
   };
 
   next = () => {

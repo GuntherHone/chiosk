@@ -32,29 +32,18 @@ class App extends Component {
   };
 
   componentDidMount() {
-    Promise.all(
-      ["getAllAssets", "getDisplayState"].map(x => fetch("/api/" + x, {}))
-    )
-      .then(([res1, res2]) => Promise.all([res1.json(), res2.json()]))
-      .then(([assets, displayState]) =>
-        this.setState({ assets, displayState })
-      );
+    fetch("/api/getAllAssets")
+      .then(this.checkResponse)
+      .then(reply => this.setState({ ...reply }));
   }
 
-  pause = () => {
-    fetch("/api/pause", { method: "POST" })
-    .then(res => res.json())
-    .then(_ => this.getDisplayState());
-  };
-
-  play = () => {
-    fetch("/api/play", { method: "POST" })
-    .then(res => res.json())
-    .then(_ => this.getDisplayState());
-  };
-
-  next = () => {
-    fetch("/api/next", { method: "POST" });
+  doAction = action => () => {
+    fetch(`/api/${action}`, { method: "POST" })
+      .then(this.checkResponse)
+      .then(_ => this.getDisplayState())
+      .catch(({ status, message }) =>
+        this.showError(`doAction(${action})`, status, message)
+      );
   };
 
   render() {
@@ -63,15 +52,17 @@ class App extends Component {
         {this.state.error && (
           <div class="App-ErrorMesssage">{this.state.error}</div>
         )}
-        <button onClick={this.next}>Next</button>
+        <button onClick={this.doAction("previous")}>Previous</button>
         {this.state.displayState === "playing" ? (
-          <button onClick={this.pause}>Pause</button>
+          <button onClick={this.doAction("pause")}>Pause</button>
         ) : this.state.displayState === "paused" ? (
-          <button onClick={this.play}>Play</button>
+          <button onClick={this.doAction("play")}>Play</button>
         ) : (
-          ""
+          <button disabled>Play</button>
         )}
+        <button onClick={this.doAction("next")}>Next</button>
         {this.state.assets.map(asset => <h2>{asset.description}</h2>)}
+        <pre>{JSON.stringify(this.state, null, 2)}</pre>
       </div>
     );
   }

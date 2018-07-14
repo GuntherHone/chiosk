@@ -52,11 +52,15 @@
         let webviews = []
         let state = "playing"
 
-        function displayNext() {
+        function displayNext(previous = false) {
             if (index >= 0) {
                 webviews[index].classList.remove("active")
             }
-            index = (index + 1) % webviews.length
+            if (!previous) {
+                index = (index + 1) % webviews.length
+            } else {
+                index = (index - 1 + webviews.length) % webviews.length
+            }
             webviews[index].classList.add("active")
             if(state === "playing") {
                 timer = setTimeout(displayNext, webviews[index].dataset.time)
@@ -101,6 +105,12 @@
             clearTimeout(timer)
             timer = null
             displayNext()
+        })
+
+        ipcRenderer.on("previous", () => {
+            clearTimeout(timer)
+            timer = null
+            displayNext(true);
         })
 
         ipcRenderer.on("getDisplayState", (event) => {

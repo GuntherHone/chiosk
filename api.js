@@ -7,8 +7,8 @@ router.get("/getAllAssets", (req, res) => {
   let assetManager = req.app.get("assetManager");
   let display = req.app.get("display");
   display.send("getDisplayState");
-  ipcMain.once("getDisplayState-reply", (event, state) => {
-    console.log(`-> getDisplayState ${state}`);
+  ipcMain.once("getDisplayState-reply", (event, {state, index}) => {
+    console.log(`-> getDisplayState:: state:${state} index:${index}`);
     res.send(
       JSON.stringify({
         status: "ok",
@@ -51,8 +51,8 @@ router.get("/getDisplayState", (req, res) => {
   console.log("API: getDisplayState");
   let display = req.app.get("display");
   display.send("getDisplayState");
-  ipcMain.once("getDisplayState-reply", (event, state) => {
-    console.log(`-> getDisplayState ${state}`);
+  ipcMain.once("getDisplayState-reply", (event, {state, index}) => {
+    console.log(`-> getDisplayState: state:${state} index:${index}`);
     res.send(JSON.stringify(state));
   });
 });

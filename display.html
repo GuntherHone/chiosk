@@ -114,7 +114,7 @@
         })
 
         ipcRenderer.on("getDisplayState", (event) => {
-            event.sender.send("getDisplayState-reply",state)
+            event.sender.send("getDisplayState-reply",{state,index})
         })
 
         ipcRenderer.on("new_asset", (event, arg) => {

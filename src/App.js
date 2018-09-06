@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
+import "boxicons/css/boxicons.min.css";
 
 const ERROR_DISPLAY_TIME_MS = 10000;
 
@@ -49,6 +50,12 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <header className="App-Header">
+          <h1 className="App-Title">
+            <i className="bx bx-tv"/>
+            Chiosk
+          </h1>
+        </header>
         {this.state.error && (
           <div class="App-ErrorMesssage">{this.state.error}</div>
         )}

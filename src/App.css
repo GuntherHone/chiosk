@@ -1,7 +1,3 @@
-.App {
-  padding:0px 20px;
-}
-
 .App-ErrorMesssage {
   background-color: rgb(98,0,0);
   color:rgb(200,0,0);
@@ -9,4 +5,16 @@
   border-radius: 5px;
   padding:10px;
   text-align: center;
+}
+
+.App-Header {
+  background-color: teal;
+}
+
+.App-Header h1 { 
+  margin:0 10px;
+}
+
+.App-Title {
+  color:white;
 }

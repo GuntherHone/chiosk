@@ -1,8 +1,16 @@
 import React, { Component } from "react";
 import "./App.css";
 import "boxicons/css/boxicons.min.css";
+import styled from "styled-components";
+import AssetDisplay from "./AssetDisplay";
 
 const ERROR_DISPLAY_TIME_MS = 10000;
+
+const Button = styled.button`
+  color: white;
+  padding: 5px;
+  background-color: teal;
+`;
 
 class App extends Component {
   state = { assets: [], error: undefined, displayState: undefined };
@@ -32,10 +40,14 @@ class App extends Component {
       );
   };
 
-  componentDidMount() {
+  getAssets = () => {
     fetch("/api/getAllAssets")
       .then(this.checkResponse)
       .then(reply => this.setState({ ...reply }));
+  };
+
+  componentDidMount() {
+    this.getAssets();
   }
 
   doAction = action => () => {
@@ -52,24 +64,27 @@ class App extends Component {
       <div className="App">
         <header className="App-Header">
           <h1 className="App-Title">
-            <i className="bx bx-tv"/>
+            <i className="bx bx-tv" />
             Chiosk
           </h1>
         </header>
         {this.state.error && (
           <div class="App-ErrorMesssage">{this.state.error}</div>
         )}
-        <button onClick={this.doAction("previous")}>Previous</button>
+        <Button onClick={this.doAction("previous")}>Previous</Button>
         {this.state.displayState === "playing" ? (
-          <button onClick={this.doAction("pause")}>Pause</button>
+          <Button onClick={this.doAction("pause")}>Pause</Button>
         ) : this.state.displayState === "paused" ? (
-          <button onClick={this.doAction("play")}>Play</button>
+          <Button onClick={this.doAction("play")}>Play</Button>
         ) : (
-          <button disabled>Play</button>
+          <Button disabled>Play</Button>
         )}
-        <button onClick={this.doAction("next")}>Next</button>
-        {this.state.assets.map(asset => <h2>{asset.description}</h2>)}
-        <pre>{JSON.stringify(this.state, null, 2)}</pre>
+        <Button onClick={this.doAction("next")}>Next</Button>
+        <table>
+          {this.state.assets.map(asset => (
+            <AssetDisplay asset={asset} doUpdate={this.getAssets}/>
+          ))}
+        </table>
       </div>
     );
   }

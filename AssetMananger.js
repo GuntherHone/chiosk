@@ -1,11 +1,12 @@
 const fs = require("fs");
+const uniqid = require("uniqid");
 
 module.exports = function AssetMananger(assetFile, autocreate = true) {
   this.assets = [];
   fs.readFile(assetFile, "utf-8", (err, data) => {
     if (err) {
       if (err.code === "ENOENT" && autocreate) {
-        fs.writeFile(assetFile, JSON.stringify(assets), err => {
+        fs.writeFile(assetFile, JSON.stringify(this.assets), err => {
           if (err) {
             throw err;
           }
@@ -18,7 +19,39 @@ module.exports = function AssetMananger(assetFile, autocreate = true) {
     }
   });
 
+  function persistData() {
+    fs.writeFileSync(assetFile, JSON.stringify(assets));
+  }
+
   return {
-    getAssets: () => this.assets
+    read: () => assets,
+
+    create: ({ description, url, time_ms }) => {
+      let newAsset = { _id: uniqid(), description, url, time_ms };
+      assets.push(newAsset);
+      persistData();
+      return newAsset;
+    },
+
+    update: (id, asset) => {
+      let index = assets.findIndex(item => item._id === id);
+
+      if (index >= 0) {
+        assets[index] = { ...assets[index], ...asset };
+      }
+
+      persistData();
+
+      return assets[index];
+    },
+
+    delete: id => {
+      let index = assets.findIndex(item => item._id === id);
+
+      if (index >= 0) {
+        assets.splice(index, 1);
+        persistData();
+      }
+    }
   };
 };

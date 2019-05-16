@@ -4,12 +4,14 @@
   "private": true,
   "main": "main.js",
   "dependencies": {
-    "boxicons": "^1.7.1",
-    "electron": "^2.0.8",
-    "express": "^4.16.3",
-    "react": "^16.5.0",
-    "react-dom": "^16.5.0",
-    "react-scripts": "1.1.5"
+    "boxicons": "^1.9.4",
+    "electron": "^2.0.18",
+    "express": "^4.16.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "1.1.5",
+    "styled-components": "^3.4.10",
+    "uniqid": "^5.0.3"
   },
   "scripts": {
     "start": "electron .",

@@ -3,6 +3,7 @@ import "boxicons/css/boxicons.min.css";
 import styled from "styled-components";
 import AssetDisplay from "./AssetDisplay";
 import Button from "./component/Button";
+import CreateDialog from "./CreateDialog";
 
 const ERROR_DISPLAY_TIME_MS = 10000;
 
@@ -101,7 +102,10 @@ class App extends Component {
       .catch(({ status, message }) =>
         this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
       );
+    this.setState({ showAddDialog: false });
   };
+
+  cancelSettings = () => this.setState({ showAddDialog: false });
 
   render() {
     return (
@@ -126,15 +130,7 @@ class App extends Component {
           )}
           <Button onClick={this.doAction("next")}>Next</Button>
         </Flex>
-        <Button
-          onClick={() =>
-            this.doCreate({
-              description: "Texas Instruments",
-              url: "https://www.ti.com",
-              time_ms: 8000
-            })
-          }
-        >
+        <Button onClick={() => this.setState({ showAddDialog: true })}>
           Add
         </Button>
         <table>
@@ -142,6 +138,14 @@ class App extends Component {
             <AssetDisplay asset={asset} doDelete={this.doDelete} />
           ))}
         </table>
+        {this.state.showAddDialog ? (
+          <CreateDialog
+            onConfirm={this.doCreate}
+            onCancel={this.cancelSettings}
+          />
+        ) : (
+          ""
+        )}
       </div>
     );
   }

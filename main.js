@@ -15,7 +15,7 @@ let window;
 
 app.on("ready", () => {
   window = new BrowserWindow({ frame: false });
-  window.webContents.openDevTools();
+  //window.webContents.openDevTools();
   window.loadFile("./display.html");
 
   window.webContents.on("dom-ready", () => {

@@ -1,19 +1,41 @@
 import React, { Component } from "react";
-import "./App.css";
 import "boxicons/css/boxicons.min.css";
 import styled from "styled-components";
 import AssetDisplay from "./AssetDisplay";
+import Button from "./component/Button";
 
 const ERROR_DISPLAY_TIME_MS = 10000;
 
-const Button = styled.button`
-  color: white;
-  padding: 5px;
+const Flex = styled.div`
+  display: flex;
+  justify-content: space-around;
+`;
+
+const AppHeader = styled.header`
+  margin-top: 0px;
   background-color: teal;
 `;
 
+const AppTitle = styled.h1`
+  color: white;
+`;
+
+const AppErrorMesssage = styled.div`
+  background-color: rgb(98, 0, 0);
+  color: rgb(200, 0, 0);
+  border: 1px solid red;
+  border-radius: 5px;
+  padding: 10px;
+  text-align: center;
+`;
+
 class App extends Component {
-  state = { assets: [], error: undefined, displayState: undefined };
+  state = {
+    assets: [],
+    error: undefined,
+    displayState: undefined,
+    showAddDialog: false
+  };
 
   checkResponse = res => {
     if (res.status === 200) {
@@ -59,30 +81,65 @@ class App extends Component {
       );
   };
 
+  doDelete = id => {
+    fetch(`/api/delete/${id}`, { method: "POST" })
+      .then(this.checkResponse)
+      .then(this.getAssets)
+      .catch(({ status, message }) =>
+        this.showError(`doDelete(${id})`, status, message)
+      );
+  };
+
+  doCreate = asset => {
+    fetch(`/api/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(asset)
+    })
+      .then(this.checkResponse)
+      .then(this.getAssets)
+      .catch(({ status, message }) =>
+        this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
+      );
+  };
+
   render() {
     return (
       <div className="App">
-        <header className="App-Header">
-          <h1 className="App-Title">
+        <AppHeader>
+          <AppTitle>
             <i className="bx bx-tv" />
             Chiosk
-          </h1>
-        </header>
+          </AppTitle>
+        </AppHeader>
         {this.state.error && (
-          <div class="App-ErrorMesssage">{this.state.error}</div>
+          <AppErrorMesssage>{this.state.error}</AppErrorMesssage>
         )}
-        <Button onClick={this.doAction("previous")}>Previous</Button>
-        {this.state.displayState === "playing" ? (
-          <Button onClick={this.doAction("pause")}>Pause</Button>
-        ) : this.state.displayState === "paused" ? (
-          <Button onClick={this.doAction("play")}>Play</Button>
-        ) : (
-          <Button disabled>Play</Button>
-        )}
-        <Button onClick={this.doAction("next")}>Next</Button>
+        <Flex>
+          <Button onClick={this.doAction("previous")}>Previous</Button>
+          {this.state.displayState === "playing" ? (
+            <Button onClick={this.doAction("pause")}>Pause</Button>
+          ) : this.state.displayState === "paused" ? (
+            <Button onClick={this.doAction("play")}>Play</Button>
+          ) : (
+            <Button disabled>Play</Button>
+          )}
+          <Button onClick={this.doAction("next")}>Next</Button>
+        </Flex>
+        <Button
+          onClick={() =>
+            this.doCreate({
+              description: "Texas Instruments",
+              url: "https://www.ti.com",
+              time_ms: 8000
+            })
+          }
+        >
+          Add
+        </Button>
         <table>
           {this.state.assets.map(asset => (
-            <AssetDisplay asset={asset} doUpdate={this.getAssets}/>
+            <AssetDisplay asset={asset} doDelete={this.doDelete} />
           ))}
         </table>
       </div>

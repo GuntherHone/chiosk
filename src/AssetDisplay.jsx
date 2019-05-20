@@ -1,16 +1,13 @@
 import React from "react";
+import Button from "./component/Button";
 
-function deleteAsset(id, doUpdate) {
-  fetch(`/api/delete/${id}`, { method: "POST" }).then(_ => doUpdate());
-}
-
-export default ({ asset, doUpdate }) => (
+export default ({ asset, doDelete }) => (
   <tr>
     <td>{asset.description}</td>
     <td>{asset.url}</td>
     <td>{asset.time_ms}</td>
     <td>
-      <button onClick={() => deleteAsset(asset._id, doUpdate)}>Delete</button>
+      <Button onClick={() => doDelete(asset._id)}>Delete</Button>
     </td>
   </tr>
 );

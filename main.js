@@ -7,6 +7,7 @@ const assets = assetManager("./assets.json");
 
 server.set("assetManager", assets);
 
+server.use(express.json());
 server.use("/api", require("./api"));
 server.use("/", express.static("build"));
 
@@ -14,6 +15,7 @@ let window;
 
 app.on("ready", () => {
   window = new BrowserWindow({ frame: false });
+  window.webContents.openDevTools();
   window.loadFile("./display.html");
 
   window.webContents.on("dom-ready", () => {

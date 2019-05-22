@@ -9,6 +9,18 @@ const Flex = styled.div`
   padding: 8px;
 `;
 
+const Label = styled.label`
+  display: inline-block;
+  width: 100px;
+`;
+
+const Input = styled.input.attrs({
+  type: "text"
+})`
+  padding: 5px;
+  border-radius: 4px;
+`;
+
 class CreateDialog extends React.Component {
   state = { settings: { name: "", urlPrefix: "https://", url: "" } };
 
@@ -27,32 +39,35 @@ class CreateDialog extends React.Component {
       <Modal title="Create new Asset">
         <form>
           <div>
-            <input
+            <Label for="description">Description:</Label>
+            <Input
               type="text"
-              placeholder="Description"
+              id="description"
               value={this.state.settings.description}
               onChange={this.handleChange("description")}
             />
           </div>
           <div>
+            <Label for="url">URL:</Label>
             <select onChange={this.handleChange("urlPrefix")}>
               <option value="https://">https://</option>
               <option value="http://">http://</option>
             </select>
-            <input
+            <Input
               type="text"
               autoCapitalize="none"
-              placeholder="URL"
+              id="URL"
               value={this.state.settings.url}
               onChange={this.handleChange("url")}
             />
-            <input
-              type="text"
-              placeholder="time in ms"
-              value={this.state.time_ms}
-              onChange={this.handleChange("time_ms")}
-            />
           </div>
+          <Label for="time">Time (ms):</Label>
+          <Input
+            type="text"
+            id="time"
+            value={this.state.time_ms}
+            onChange={this.handleChange("time_ms")}
+          />
         </form>
         <Flex>
           <Button onClick={this.onConfirm}>OK</Button>

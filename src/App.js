@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "boxicons/css/boxicons.min.css";
 import styled from "styled-components";
-import AssetDisplay from "./AssetDisplay";
+import Asset from "./Asset";
 import Button from "./component/Button";
 import CreateDialog from "./CreateDialog";
 
@@ -13,12 +13,16 @@ const Flex = styled.div`
 `;
 
 const AppHeader = styled.header`
-  margin-top: 0px;
+  margin: 0px 0px 10px 0px;
   background-color: teal;
+  display:flex;
+  justify-content:center;
 `;
 
 const AppTitle = styled.h1`
   color: white;
+  margin: 0;
+  padding: 8px;
 `;
 
 const AppErrorMesssage = styled.div`
@@ -42,7 +46,8 @@ class App extends Component {
     if (res.status === 200) {
       return res.json();
     } else {
-      throw { status: res.status, message: res.statusText };
+      let err = { status: res.status, message: res.statusText }
+      throw err;
     }
   };
 
@@ -133,11 +138,10 @@ class App extends Component {
         <Button onClick={() => this.setState({ showAddDialog: true })}>
           Add
         </Button>
-        <table>
-          {this.state.assets.map(asset => (
-            <AssetDisplay asset={asset} doDelete={this.doDelete} />
-          ))}
-        </table>
+        {this.state.assets.map(asset => (
+          <Asset asset={asset} doDelete={this.doDelete} />
+        ))}
+
         {this.state.showAddDialog ? (
           <CreateDialog
             onConfirm={this.doCreate}

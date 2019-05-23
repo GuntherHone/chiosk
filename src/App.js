@@ -4,6 +4,9 @@ import styled from "styled-components";
 import Asset from "./Asset";
 import Button from "./component/Button";
 import CreateDialog from "./CreateDialog";
+import BackButton from "./BackButton";
+import ForwardButton from "./ForwardButton";
+import PlayPauseButton from "./PlayPauseButton";
 
 const ERROR_DISPLAY_TIME_MS = 10000;
 
@@ -15,8 +18,8 @@ const Flex = styled.div`
 const AppHeader = styled.header`
   margin: 0px 0px 10px 0px;
   background-color: teal;
-  display:flex;
-  justify-content:center;
+  display: flex;
+  justify-content: center;
 `;
 
 const AppTitle = styled.h1`
@@ -46,7 +49,7 @@ class App extends Component {
     if (res.status === 200) {
       return res.json();
     } else {
-      let err = { status: res.status, message: res.statusText }
+      let err = { status: res.status, message: res.statusText };
       throw err;
     }
   };
@@ -125,15 +128,16 @@ class App extends Component {
           <AppErrorMesssage>{this.state.error}</AppErrorMesssage>
         )}
         <Flex>
-          <Button onClick={this.doAction("previous")}>Previous</Button>
-          {this.state.displayState === "playing" ? (
-            <Button onClick={this.doAction("pause")}>Pause</Button>
-          ) : this.state.displayState === "paused" ? (
-            <Button onClick={this.doAction("play")}>Play</Button>
-          ) : (
-            <Button disabled>Play</Button>
-          )}
-          <Button onClick={this.doAction("next")}>Next</Button>
+          <BackButton onClick={this.doAction("previous")}>Previous</BackButton>
+          <PlayPauseButton
+            onClick={
+              this.state.displayState === "playing"
+                ? this.doAction("pause")
+                : this.doAction("play")
+            }
+            playing={this.state.displayState === "playing"}
+          />
+          <ForwardButton onClick={this.doAction("next")}>Next</ForwardButton>
         </Flex>
         <Button onClick={() => this.setState({ showAddDialog: true })}>
           Add

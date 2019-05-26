@@ -1,13 +1,15 @@
 import React from "react";
 import Button from "./component/Button";
 import styled from "styled-components";
+import DeleteButton from "./DeleteButton";
+import EditButton from "./EditButton";
 
 const Container = styled.div`
   border: 1px solid lightgrey;
   margin: 8px;
   padding: 10px;
   border-radius: 4px;
-  display:flex;
+  display: flex;
   justify-content: space-between;
 `;
 
@@ -17,7 +19,11 @@ const Title = styled.h2`
 `;
 
 const DetailDisplay = styled.div``;
-const Controls = styled.div``;
+const Controls = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
 
 const Details = styled.div`
   &:before {
@@ -37,7 +43,8 @@ export default ({ asset, doDelete }) => (
       <Details label="Time (ms)">{asset.time_ms}</Details>
     </DetailDisplay>
     <Controls>
-      <Button onClick={() => doDelete(asset._id)}>Delete</Button>
+      <EditButton onClick={() => alert(asset.description)} />
+      <DeleteButton onClick={() => doDelete(asset._id)} />
     </Controls>
   </Container>
 );

@@ -4,7 +4,6 @@
   "private": true,
   "main": "main.js",
   "dependencies": {
-    "boxicons": "^1.9.4",
     "electron": "^2.0.18",
     "express": "^4.16.4",
     "react": "^16.8.6",

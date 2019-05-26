@@ -100,17 +100,17 @@ class App extends Component {
   };
 
   doCreate = asset => {
-    fetch(`/api/create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(asset)
-    })
-      .then(this.checkResponse)
-      .then(this.getAssets)
-      .catch(({ status, message }) =>
-        this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
-      );
-    this.setState({ showAddDialog: false });
+      fetch(`/api/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(asset)
+      })
+        .then(this.checkResponse)
+        .then(this.getAssets)
+        .catch(({ status, message }) =>
+          this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
+        );
+        this.setState({ showAddDialog: false });
   };
 
   cancelSettings = () => this.setState({ showAddDialog: false });
@@ -119,16 +119,13 @@ class App extends Component {
     return (
       <div className="App">
         <AppHeader>
-          <AppTitle>
-            <i className="bx bx-tv" />
-            Chiosk
-          </AppTitle>
+          <AppTitle>Chiosk</AppTitle>
         </AppHeader>
         {this.state.error && (
           <AppErrorMesssage>{this.state.error}</AppErrorMesssage>
         )}
         <Flex>
-          <BackButton onClick={this.doAction("previous")}>Previous</BackButton>
+          <BackButton onClick={this.doAction("previous")} />
           <PlayPauseButton
             onClick={
               this.state.displayState === "playing"
@@ -137,7 +134,7 @@ class App extends Component {
             }
             playing={this.state.displayState === "playing"}
           />
-          <ForwardButton onClick={this.doAction("next")}>Next</ForwardButton>
+          <ForwardButton onClick={this.doAction("next")} />
         </Flex>
         <Button onClick={() => this.setState({ showAddDialog: true })}>
           Add

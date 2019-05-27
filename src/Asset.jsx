@@ -1,5 +1,4 @@
 import React from "react";
-import Button from "./component/Button";
 import styled from "styled-components";
 import DeleteButton from "./DeleteButton";
 import EditButton from "./EditButton";

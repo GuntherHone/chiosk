@@ -42,7 +42,8 @@ class App extends Component {
     assets: [],
     error: undefined,
     displayState: undefined,
-    showAddDialog: false
+    showAddDialog: false,
+    editData: { description: "", url: "", time_ms: 5000 }
   };
 
   checkResponse = res => {
@@ -99,7 +100,8 @@ class App extends Component {
       );
   };
 
-  doCreate = asset => {
+  doCreateOrUpdate = asset => {
+    if (!asset._id) {
       fetch(`/api/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -110,7 +112,26 @@ class App extends Component {
         .catch(({ status, message }) =>
           this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
         );
-        this.setState({ showAddDialog: false });
+    } else {
+      fetch(`/api/update/${asset._id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(asset)
+      })
+        .then(this.checkResponse)
+        .then(this.getAssets)
+        .catch(({ status, message }) =>
+          this.showError(`doUpdate(${JSON.stringify(asset)})`, status, message)
+        );
+    }
+    this.setState({ showAddDialog: false });
+  };
+
+  showEditDialog = id => {
+    this.setState({
+      showAddDialog: true,
+      editData: this.state.assets.find(asset => asset._id === id)
+    });
   };
 
   cancelSettings = () => this.setState({ showAddDialog: false });
@@ -136,17 +157,29 @@ class App extends Component {
           />
           <ForwardButton onClick={this.doAction("next")} />
         </Flex>
-        <Button onClick={() => this.setState({ showAddDialog: true })}>
+        <Button
+          onClick={() =>
+            this.setState({
+              showAddDialog: true,
+              editData: { description: "", url: "", time_ms: 5000 }
+            })
+          }
+        >
           Add
         </Button>
         {this.state.assets.map(asset => (
-          <Asset asset={asset} doDelete={this.doDelete} />
+          <Asset
+            asset={asset}
+            doDelete={this.doDelete}
+            doEdit={this.showEditDialog}
+          />
         ))}
 
         {this.state.showAddDialog ? (
           <CreateDialog
-            onConfirm={this.doCreate}
+            onConfirm={this.doCreateOrUpdate}
             onCancel={this.cancelSettings}
+            initialData={this.state.editData}
           />
         ) : (
           ""

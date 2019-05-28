@@ -2,6 +2,7 @@ import React from "react";
 import Modal from "./component/Modal";
 import Button from "./component/Button";
 import styled from "styled-components";
+import parseUri from "./parseUri";
 
 const Flex = styled.div`
   display: flex;
@@ -22,7 +23,9 @@ const Input = styled.input.attrs({
 `;
 
 class CreateDialog extends React.Component {
-  state = { settings: { name: "", urlPrefix: "https://", url: "" } };
+  state = {
+    settings: { description: "", urlPrefix: "https://", url: "", time_ms: 0 }
+  };
 
   handleChange = key => event =>
     this.setState({
@@ -30,13 +33,31 @@ class CreateDialog extends React.Component {
     });
 
   onConfirm = () => {
-    let url = this.state.settings.urlPrefix + this.state.settings.url;
-    this.props.onConfirm({ ...this.state.settings, url });
+    const url = this.state.settings.urlPrefix + this.state.settings.url;
+    let confirmData = { ...this.state.settings, url };
+    delete confirmData.urlPrefix;
+
+    this.props.onConfirm(confirmData);
+  };
+
+  componentDidMount = () => {
+    const uri = parseUri(this.props.initialData.url);
+    uri.protocol = !uri.protocol.length ? "https" : uri.protocol;
+
+    this.setState({
+      settings: {
+        ...this.props.initialData,
+        url: uri.host + uri.path,
+        urlPrefix: uri.protocol + "://"
+      }
+    });
   };
 
   render() {
     return (
-      <Modal title="Create new Asset">
+      <Modal
+        title={this.state.settings._id ? "Edit Asset" : "Create new Asset"}
+      >
         <form>
           <div>
             <Label for="description">Description:</Label>
@@ -49,7 +70,10 @@ class CreateDialog extends React.Component {
           </div>
           <div>
             <Label for="url">URL:</Label>
-            <select onChange={this.handleChange("urlPrefix")}>
+            <select
+              onChange={this.handleChange("urlPrefix")}
+              value={this.state.settings.urlPrefix}
+            >
               <option value="https://">https://</option>
               <option value="http://">http://</option>
             </select>
@@ -65,7 +89,7 @@ class CreateDialog extends React.Component {
           <Input
             type="text"
             id="time"
-            value={this.state.time_ms}
+            value={this.state.settings.time_ms}
             onChange={this.handleChange("time_ms")}
           />
         </form>

@@ -157,6 +157,15 @@
           }
         }
       });
+
+      ipcRenderer.on("update_asset", (event, asset) => {
+        const webviewForUpdate = webviews.find(view => view.dataset.id === asset._id);
+        
+        if(webviewForUpdate) {
+          webviewForUpdate.setAttribute("src",asset.url);
+          webviewForUpdate.setAttribute("data-time", asset.time_ms);
+        }
+      })
     </script>
   </body>
 </html>

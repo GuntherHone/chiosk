@@ -34,7 +34,7 @@ const Details = styled.div`
   margin: 8px;
 `;
 
-export default ({ asset, doDelete }) => (
+export default ({ asset, doDelete, doEdit }) => (
   <Container>
     <DetailDisplay>
       <Title>{asset.description}</Title>
@@ -42,7 +42,7 @@ export default ({ asset, doDelete }) => (
       <Details label="Time (ms)">{asset.time_ms}</Details>
     </DetailDisplay>
     <Controls>
-      <EditButton onClick={() => alert(asset.description)} />
+      <EditButton onClick={() => doEdit(asset._id)} />
       <DeleteButton onClick={() => doDelete(asset._id)} />
     </Controls>
   </Container>

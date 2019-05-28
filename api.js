@@ -6,10 +6,16 @@ function sendOK(res) {
   res.send(JSON.stringify({ status: "ok" }));
 }
 
-router.get("/getAllAssets", (req, res) => {
-  console.log("API: getAllAssets");
+function getControlsFromApp(req) {
   let assetManager = req.app.get("assetManager");
   let display = req.app.get("display");
+  return [assetManager, display];
+}
+
+router.get("/getAllAssets", (req, res) => {
+  console.log("API: getAllAssets");
+  const [assetManager, display] = getControlsFromApp(req);
+
   display.send("getDisplayState");
   ipcMain.once("getDisplayState-reply", (event, { state, index }) => {
     console.log(`-> getDisplayState:: state:${state} index:${index}`);
@@ -25,35 +31,40 @@ router.get("/getAllAssets", (req, res) => {
 
 router.post("/pause", (req, res) => {
   console.log("API: pause");
-  let display = req.app.get("display");
+  const [assetManager, display] = getControlsFromApp(req);
+
   display.send("pause");
   sendOK(res);
 });
 
 router.post("/play", (req, res) => {
   console.log("API: play");
-  let display = req.app.get("display");
+  const [assetManager, display] = getControlsFromApp(req);
+
   display.send("play");
   sendOK(res);
 });
 
 router.post("/next", (req, res) => {
   console.log("API: next");
-  let display = req.app.get("display");
+  const [assetManager, display] = getControlsFromApp(req);
+
   display.send("next");
   sendOK(res);
 });
 
 router.post("/previous", (req, res) => {
   console.log("API: previous");
-  let display = req.app.get("display");
+  const [assetManager, display] = getControlsFromApp(req);
+
   display.send("previous");
   sendOK(res);
 });
 
 router.get("/getDisplayState", (req, res) => {
   console.log("API: getDisplayState");
-  let display = req.app.get("display");
+  const [assetManager, display] = getControlsFromApp(req);
+
   display.send("getDisplayState");
   ipcMain.once("getDisplayState-reply", (event, { state, index }) => {
     console.log(`-> getDisplayState: state:${state} index:${index}`);
@@ -63,11 +74,9 @@ router.get("/getDisplayState", (req, res) => {
 
 router.post("/delete/:id?", (req, res) => {
   console.log(`API: delete ${req.params.id}`);
+  const [assetManager, display] = getControlsFromApp(req);
 
-  const assetManager = req.app.get("assetManager");
   assetManager.delete(req.params.id);
-
-  const display = req.app.get("display");
   display.send("delete_asset", req.params.id);
 
   sendOK(res);
@@ -75,12 +84,20 @@ router.post("/delete/:id?", (req, res) => {
 
 router.post("/create", (req, res) => {
   console.log(`API: create ${JSON.stringify(req.body)}`);
+  const [assetManager, display] = getControlsFromApp(req);
 
-  const assetManager = req.app.get("assetManager");
   let newAsset = assetManager.create(req.body);
-
-  const display = req.app.get("display");
   display.send("new_asset", newAsset);
+
+  sendOK(res);
+});
+
+router.post("/update/:id?", (req, res) => {
+  console.log(`API: update ${req.params.id}`);
+  const [assetManager, display] = getControlsFromApp(req);
+
+  assetManager.update(req.params.id, req.body);
+  display.send("update_asset", req.body);
 
   sendOK(res);
 });

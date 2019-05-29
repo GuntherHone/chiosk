@@ -1,129 +1,171 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <style>
-        html,
-        body {
-            padding: 0;
-            margin: 0;
-        }
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+      }
 
-        .app {
-            width: 100vw;
-            height: 100vh;
-        }
+      .app {
+        width: 100vw;
+        height: 100vh;
+      }
 
-        webview {
-            width: 0;
-            height: 0;
-        }
+      webview {
+        width: 0;
+        height: 0;
+      }
 
-        webview.active {
-            width: 100%;
-            height: 100%;
-        }
+      webview.active {
+        width: 100%;
+        height: 100%;
+      }
 
-        .overlay {
-            position:fixed;
-            top:0;
-            left:0;
-            z-index: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width:100vw;
-            height:100vh;
-            font-size:48px;
-            font-family: arial;
-        }
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        font-size: 128px;
+        font-family: arial;
+        font-weight: bold;
+        color: rgba(0, 0, 0, 0.5);
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="app"></div>
     <div class="overlay"></div>
     <script>
-        const { ipcRenderer } = require("electron")
-        let app = document.querySelector(".app")
-        let overlay = document.querySelector(".overlay")
-        let index = -1
-        let timer
-        let webviews = []
-        let state = "playing"
+      const { ipcRenderer } = require("electron");
+      let app = document.querySelector(".app");
+      let overlay = document.querySelector(".overlay");
+      let index = -1;
+      let timer;
+      let webviews = [];
+      let state = "playing";
 
-        function displayNext(previous = false) {
-            if (index >= 0) {
-                webviews[index].classList.remove("active")
-            }
-            if (!previous) {
-                index = (index + 1) % webviews.length
-            } else {
-                index = (index - 1 + webviews.length) % webviews.length
-            }
-            webviews[index].classList.add("active")
-            if(state === "playing") {
-                timer = setTimeout(displayNext, webviews[index].dataset.time)
-            }
+      function displayNext(previous = false) {
+        let deleteIndex = -1;
+        if (index >= 0) {
+          webviews[index].classList.remove("active");
+          if (webviews[index].dataset.delete) {
+            deleteIndex = index;
+          }
         }
+        if (!previous) {
+          index = (index + 1) % webviews.length;
+        } else {
+          index = (index - 1 + webviews.length) % webviews.length;
+        }
+        webviews[index].classList.add("active");
+        if (state === "playing") {
+          timer = setTimeout(displayNext, webviews[index].dataset.time);
+        }
+        if (deleteIndex >= 0) {
+          app.removeChild(webviews[deleteIndex]);
+          webviews.splice(deleteIndex, 1);
+        }
+      }
 
-        ipcRenderer.on("set_assets", (event, assets) => {
-            if (assets.length) {
-                Promise.all(assets.map(asset => new Promise((resolve, reject) => {
-                    let webview = document.createElement("webview")
-                    webview.setAttribute("src", asset.url)
-                    webview.setAttribute("data-id", asset._id)
-                    webview.setAttribute("data-time", asset.time_ms)
-                    webview.addEventListener("dom-ready", () => {
-                        webview.insertCSS('html,body{overflow:hidden !important;}')
-                        resolve(webview)
-                    })
-                    app.appendChild(webview)
-                })))
-                    .then(allWebViews => {
-                        webviews = allWebViews
-                        index = -1
-                        displayNext()
-                    })
+      ipcRenderer.on("set_assets", (event, assets) => {
+        if (assets.length) {
+          Promise.all(
+            assets.map(
+              asset =>
+                new Promise((resolve, reject) => {
+                  let webview = document.createElement("webview");
+                  webview.setAttribute("src", asset.url);
+                  webview.setAttribute("data-id", asset._id);
+                  webview.setAttribute("data-time", asset.time_ms);
+                  webview.addEventListener("dom-ready", () => {
+                    webview.insertCSS("html,body{overflow:hidden !important;}");
+                    resolve(webview);
+                  });
+                  app.appendChild(webview);
+                })
+            )
+          ).then(allWebViews => {
+            webviews = allWebViews;
+            index = -1;
+            displayNext();
+          });
+        }
+      });
+
+      ipcRenderer.on("pause", () => {
+        clearTimeout(timer);
+        state = "paused";
+        timer = null;
+        overlay.innerHTML = "PAUSED";
+      });
+
+      ipcRenderer.on("play", () => {
+        state = "playing";
+        overlay.innerHTML = "";
+        displayNext();
+      });
+
+      ipcRenderer.on("next", () => {
+        clearTimeout(timer);
+        timer = null;
+        displayNext();
+      });
+
+      ipcRenderer.on("previous", () => {
+        clearTimeout(timer);
+        timer = null;
+        displayNext(true);
+      });
+
+      ipcRenderer.on("getDisplayState", event => {
+        event.sender.send("getDisplayState-reply", { state, index });
+      });
+
+      ipcRenderer.on("new_asset", (event, asset) => {
+        let webview = document.createElement("webview");
+        webview.setAttribute("src", asset.url);
+        webview.setAttribute("data-id", asset._id);
+        webview.setAttribute("data-time", asset.time_ms);
+        webview.addEventListener("dom-ready", () => {
+          webview.insertCSS("html,body{overflow:hidden !important;}");
+          webviews.push(webview);
+        });
+        app.appendChild(webview);
+      });
+
+      ipcRenderer.on("delete_asset", (event, id) => {
+        let webviewIndex = webviews.findIndex(view => view.dataset.id === id);
+        if (webviewIndex >= 0) {
+          if (webviewIndex === index) {
+            webviews[webviewIndex].setAttribute("data-delete", true);
+          } else {
+            app.removeChild(webviews[webviewIndex]);
+            webviews.splice(webviewIndex, 1);
+
+            if (webviewIndex < index) {
+              --index;
             }
-        })
+          }
+        }
+      });
 
-        ipcRenderer.on("pause", () => {
-            clearTimeout(timer)
-            state = "paused"
-            timer = null
-            overlay.innerHTML = "PAUSED"
-        })
-
-        ipcRenderer.on("play", () => {
-            state = "playing"
-            overlay.innerHTML = ""
-            displayNext()
-        })
-
-        ipcRenderer.on("next", () => {
-            clearTimeout(timer)
-            timer = null
-            displayNext()
-        })
-
-        ipcRenderer.on("previous", () => {
-            clearTimeout(timer)
-            timer = null
-            displayNext(true);
-        })
-
-        ipcRenderer.on("getDisplayState", (event) => {
-            event.sender.send("getDisplayState-reply",{state,index})
-        })
-
-        ipcRenderer.on("new_asset", (event, arg) => {
-            let webview = document.createElement("webview")
-            webview.setAttribute("src", arg.url)
-            app.appendChild(webview)
-            webview.classList.toggle("active")
-        })
+      ipcRenderer.on("update_asset", (event, asset) => {
+        const webviewForUpdate = webviews.find(view => view.dataset.id === asset._id);
+        
+        if(webviewForUpdate) {
+          webviewForUpdate.setAttribute("src",asset.url);
+          webviewForUpdate.setAttribute("data-time", asset.time_ms);
+        }
+      })
     </script>
-</body>
-
+  </body>
 </html>

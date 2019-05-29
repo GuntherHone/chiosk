@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "boxicons/css/boxicons.min.css";
 import styled from "styled-components";
 import Asset from "./Asset";
 import Button from "./component/Button";
@@ -15,20 +14,20 @@ const Flex = styled.div`
   justify-content: space-around;
 `;
 
-const AppHeader = styled.header`
+const Header = styled.header`
   margin: 0px 0px 10px 0px;
   background-color: teal;
   display: flex;
   justify-content: center;
 `;
 
-const AppTitle = styled.h1`
+const Title = styled.h1`
   color: white;
   margin: 0;
   padding: 8px;
 `;
 
-const AppErrorMesssage = styled.div`
+const ErrorMesssage = styled.div`
   background-color: rgb(98, 0, 0);
   color: rgb(200, 0, 0);
   border: 1px solid red;
@@ -101,29 +100,16 @@ class App extends Component {
   };
 
   doCreateOrUpdate = asset => {
-    if (!asset._id) {
-      fetch(`/api/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(asset)
-      })
-        .then(this.checkResponse)
-        .then(this.getAssets)
-        .catch(({ status, message }) =>
-          this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
-        );
-    } else {
-      fetch(`/api/update/${asset._id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(asset)
-      })
-        .then(this.checkResponse)
-        .then(this.getAssets)
-        .catch(({ status, message }) =>
-          this.showError(`doUpdate(${JSON.stringify(asset)})`, status, message)
-        );
-    }
+    fetch(asset._id ? `/api/update/${asset._id}` : `/api/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(asset)
+    })
+      .then(this.checkResponse)
+      .then(this.getAssets)
+      .catch(({ status, message }) =>
+        this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
+      );
     this.setState({ showAddDialog: false });
   };
 
@@ -138,12 +124,12 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <AppHeader>
-          <AppTitle>Chiosk</AppTitle>
-        </AppHeader>
+      <div>
+        <Header>
+          <Title>Chiosk</Title>
+        </Header>
         {this.state.error && (
-          <AppErrorMesssage>{this.state.error}</AppErrorMesssage>
+          <ErrorMesssage>{this.state.error}</ErrorMesssage>
         )}
         <Flex>
           <BackButton onClick={this.doAction("previous")} />

@@ -7,6 +7,7 @@ export default ({onClick}) => (
     height="24"
     viewBox="0 0 24 24"
     onClick={onClick}
+    style={{ cursor: "pointer" }}
   >
     <path
       fill="none"

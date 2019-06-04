@@ -135,10 +135,14 @@
         webview.setAttribute("src", asset.url);
         webview.setAttribute("data-id", asset._id);
         webview.setAttribute("data-time", asset.time_ms);
-        webview.addEventListener("dom-ready", () => {
-          webview.insertCSS("html,body{overflow:hidden !important;}");
-          webviews.push(webview);
-        });
+        webview.addEventListener(
+          "dom-ready",
+          () => {
+            webview.insertCSS("html,body{overflow:hidden !important;}");
+            webviews.push(webview);
+          },
+          { once: true }
+        );
         app.appendChild(webview);
       });
 
@@ -159,13 +163,20 @@
       });
 
       ipcRenderer.on("update_asset", (event, asset) => {
-        const webviewForUpdate = webviews.find(view => view.dataset.id === asset._id);
-        
-        if(webviewForUpdate) {
-          webviewForUpdate.setAttribute("src",asset.url);
+        const webviewForUpdate = webviews.find(
+          view => view.dataset.id === asset._id
+        );
+
+        if (webviewForUpdate) {
+          webviewForUpdate.setAttribute("src", asset.url);
           webviewForUpdate.setAttribute("data-time", asset.time_ms);
         }
-      })
+      });
+
+      ipcRenderer.on("reorder_asset", (event, { source, destination }) => {
+        const [webview] = webviews.splice(source, 1);
+        webviews.splice(destination, 0, webview);
+      });
     </script>
   </body>
 </html>

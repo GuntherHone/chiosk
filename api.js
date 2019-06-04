@@ -102,4 +102,22 @@ router.post("/update/:id?", (req, res) => {
   sendOK(res);
 });
 
+router.post("/reorder", (req, res) => {
+  const { source, destination } = req.body;
+  console.log(`API: reorder source = ${source} destination = ${destination}`);
+  const [assetManager, display] = getControlsFromApp(req);
+  assetManager.reorder(source, destination);
+  display.send("reorder_asset", req.body);
+
+  sendOK(res);
+});
+
+router.post("/toggledevtools", (req, res) => {
+  console.log(`API: toggledevtools`);
+  const [assetManager, display] = getControlsFromApp(req);
+  display.openDevTools();
+
+  sendOK(res);
+})
+
 module.exports = router;

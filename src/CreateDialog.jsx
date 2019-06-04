@@ -47,7 +47,7 @@ class CreateDialog extends React.Component {
     this.setState({
       settings: {
         ...this.props.initialData,
-        url: uri.host + uri.path,
+        url: `${uri.host}${uri.port?`:${uri.port}`:""}${uri.path}`,
         urlPrefix: uri.protocol + "://"
       }
     });

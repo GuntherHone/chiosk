@@ -54,13 +54,12 @@
       let state = "playing";
 
       function displayNext(previous = false) {
-        let deleteIndex = -1;
+        let previousIndex = index;
+
         if (index >= 0) {
           webviews[index].classList.remove("active");
-          if (webviews[index].dataset.delete) {
-            deleteIndex = index;
-          }
         }
+
         if (!previous) {
           index = (index + 1) % webviews.length;
         } else {
@@ -70,12 +69,21 @@
         if (state === "playing") {
           timer = setTimeout(displayNext, webviews[index].dataset.time);
         }
-        if (deleteIndex >= 0) {
-          app.removeChild(webviews[deleteIndex]);
-          webviews.splice(deleteIndex, 1);
+        
+        if (previousIndex >= 0) {
+          if (webviews[previousIndex].dataset.delete) {
+            app.removeChild(webviews[previousIndex]);
+            webviews.splice(previousIndex, 1);
 
-          if (deleteIndex < index) {
-            --index;
+            if (previousIndex < index) {
+              --index;
+            }
+          } else {
+            // Refresh the view
+            webviews[previousIndex].setAttribute(
+              "src",
+              webviews[previousIndex].getAttribute("src")
+            );
           }
         }
       }

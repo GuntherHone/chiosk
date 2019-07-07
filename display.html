@@ -73,6 +73,10 @@
         if (deleteIndex >= 0) {
           app.removeChild(webviews[deleteIndex]);
           webviews.splice(deleteIndex, 1);
+
+          if (deleteIndex < index) {
+            --index;
+          }
         }
       }
 

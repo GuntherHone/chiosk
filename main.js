@@ -14,8 +14,7 @@ server.use("/", express.static("build"));
 let window;
 
 app.on("ready", () => {
-  window = new BrowserWindow({ frame: false });
-  //window.webContents.openDevTools();
+  window = new BrowserWindow({ frame: false, fullscreen: true });
   window.loadFile("./display.html");
 
   window.webContents.on("dom-ready", () => {

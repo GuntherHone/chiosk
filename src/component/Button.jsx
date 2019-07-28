@@ -7,4 +7,5 @@ export default styled.button`
   font-size: 16px;
   border: 1px solid ${props => props.theme.primary};
   border-radius: 5px;
+  cursor: pointer;
 `;

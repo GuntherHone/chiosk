@@ -4,11 +4,13 @@
     <style>
       html,
       body {
+        font-family: Arial, Helvetica, sans-serif;
         padding: 0;
         margin: 0;
       }
 
       .app {
+        display: none;
         width: 100vw;
         height: 100vh;
       }
@@ -23,6 +25,38 @@
         height: 100%;
       }
 
+      .splashscreen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(27deg, #151515 5px, transparent 5px) 0 5px,
+          linear-gradient(207deg, #151515 5px, transparent 5px) 10px 0px,
+          linear-gradient(27deg, #222 5px, transparent 5px) 0px 10px,
+          linear-gradient(207deg, #222 5px, transparent 5px) 10px 5px,
+          linear-gradient(90deg, #1b1b1b 10px, transparent 10px),
+          linear-gradient(
+            #1d1d1d 25%,
+            #1a1a1a 25%,
+            #1a1a1a 50%,
+            transparent 50%,
+            transparent 75%,
+            #242424 75%,
+            #242424
+          );
+        background-color: #131313;
+        background-size: 20px 20px;
+        color: #aaa;
+      }
+
+      .splashscreen h1 {
+        font-size: 80px;
+        margin: 0;
+        padding: 0;
+      }
+
       .overlay {
         position: fixed;
         top: 0;
@@ -34,7 +68,6 @@
         width: 100vw;
         height: 100vh;
         font-size: 128px;
-        font-family: arial;
         font-weight: bold;
         color: rgba(0, 0, 0, 0.5);
       }
@@ -42,6 +75,12 @@
   </head>
 
   <body>
+    <div class="splashscreen">
+      <h1>Chiosk</h1>
+      <p>
+        Goto http://<span id="ipaddress"></span>:3000 to setup display assets
+      </p>
+    </div>
     <div class="app"></div>
     <div class="overlay"></div>
     <script>
@@ -52,6 +91,16 @@
       let timer;
       let webviews = [];
       let state = "playing";
+
+      function setSplashScreen(onOff) {
+        if (onOff === "off") {
+          document.querySelector(".app").style.display = "block";
+          document.querySelector(".splashscreen").style.display = "none";
+        } else if (onOff === "on") {
+          document.querySelector(".app").style.display = "none";
+          document.querySelector(".splashscreen").style.display = "flex";
+        }
+      }
 
       function displayNext(previous = false) {
         let previousIndex = index;
@@ -69,7 +118,7 @@
         if (state === "playing") {
           timer = setTimeout(displayNext, webviews[index].dataset.time);
         }
-        
+
         if (previousIndex >= 0) {
           if (webviews[previousIndex].dataset.delete) {
             app.removeChild(webviews[previousIndex]);
@@ -78,11 +127,26 @@
             if (previousIndex < index) {
               --index;
             }
+
+            if (webviews.length === 0) {
+              clearTimeout(timer);
+              index = -1;
+              setSplashScreen("on");
+            }
           } else {
             // Refresh the view
             webviews[previousIndex].setAttribute(
               "src",
               webviews[previousIndex].getAttribute("src")
+            );
+
+            webviews[previousIndex].addEventListener(
+              "dom-ready",
+              () => {
+                console.log(`${webviews[previousIndex].getAttribute("src")} refreshed...`)
+                webviews[previousIndex].insertCSS("html,body{overflow:hidden !important;}");
+              },
+              { once: true }
             );
           }
         }
@@ -90,6 +154,7 @@
 
       ipcRenderer.on("set_assets", (event, assets) => {
         if (assets.length) {
+          setSplashScreen("off");
           Promise.all(
             assets.map(
               asset =>
@@ -98,10 +163,19 @@
                   webview.setAttribute("src", asset.url);
                   webview.setAttribute("data-id", asset._id);
                   webview.setAttribute("data-time", asset.time_ms);
-                  webview.addEventListener("dom-ready", () => {
-                    webview.insertCSS("html,body{overflow:hidden !important;}");
-                    resolve(webview);
-                  });
+                  webview.addEventListener(
+                    "dom-ready",
+                    () => {
+                      console.log(
+                        `${webview.getAttribute("src")} DOM is ready!`
+                      );
+                      webview.insertCSS(
+                        "html,body{overflow:hidden !important;}"
+                      );
+                      resolve(webview);
+                    },
+                    { once: true }
+                  );
                   app.appendChild(webview);
                 })
             )
@@ -143,15 +217,24 @@
       });
 
       ipcRenderer.on("new_asset", (event, asset) => {
-        let webview = document.createElement("webview");
+        if (index === -1) {
+          setSplashScreen("off");
+        }
+
+        const webview = document.createElement("webview");
         webview.setAttribute("src", asset.url);
         webview.setAttribute("data-id", asset._id);
         webview.setAttribute("data-time", asset.time_ms);
         webview.addEventListener(
           "dom-ready",
           () => {
+            console.log(`${webview.getAttribute("src")} DOM is ready!`);
             webview.insertCSS("html,body{overflow:hidden !important;}");
             webviews.push(webview);
+
+            if (index === -1) {
+              displayNext();
+            }
           },
           { once: true }
         );
@@ -169,6 +252,12 @@
 
             if (webviewIndex < index) {
               --index;
+            }
+
+            if (webviews.length === 0) {
+              console.log("All assets deleted");
+              index = -1;
+              setSplashScreen("on");
             }
           }
         }
@@ -188,6 +277,10 @@
       ipcRenderer.on("reorder_asset", (event, { source, destination }) => {
         const [webview] = webviews.splice(source, 1);
         webviews.splice(destination, 0, webview);
+      });
+
+      ipcRenderer.on("set_ip_address", (event, ipaddress) => {
+        document.querySelector("#ipaddress").textContent = ipaddress;
       });
     </script>
   </body>

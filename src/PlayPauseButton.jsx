@@ -10,6 +10,7 @@ export default ({ onClick, playing }) => {
       onTouchStart={() => setTouched(true)}
       onTouchEnd={() => setTouched(false)}
       onClick={onClick}
+      style={{ cursor: "pointer" }}
     >
       <circle cx="40" cy="40" r="40" fill="#aaa" />
       {playing ? (

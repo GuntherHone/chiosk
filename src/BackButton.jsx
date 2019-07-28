@@ -10,6 +10,7 @@ export default ({onClick}) => {
       onTouchStart={() => setTouched(true)}
       onTouchEnd={() => setTouched(false)}
       onClick={onClick}
+      style={{ cursor: "pointer" }}
     >
       <polyline
         points="50 25 50 55 25 40 50 25"

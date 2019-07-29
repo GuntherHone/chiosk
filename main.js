@@ -1,6 +1,7 @@
 const { app, BrowserWindow } = require("electron");
 const express = require("express");
 const assetManager = require("./AssetMananger");
+const findmyip = require("./findmyip");
 
 const server = express();
 const assets = assetManager("./assets.json");
@@ -18,7 +19,7 @@ app.on("ready", () => {
   window.loadFile("./display.html");
 
   window.webContents.on("dom-ready", () => {
-    window.webContents.send("set_ip_address", "192.168.0.12");
+    window.webContents.send("set_ip_address", findmyip()[0]);
     window.webContents.send("set_assets", assets.read());
     server.set("display", window.webContents);
     server.listen(3000, () => console.log("Listening on port 3000"));

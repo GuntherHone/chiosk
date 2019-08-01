@@ -6,13 +6,16 @@ import parseUri from "./parseUri";
 
 const Flex = styled.div`
   display: flex;
-  justify-content: space-between;
-  padding: 8px;
+  justify-content: flex-end;
+  padding: 15px;
+  border-top: 1px solid #ccc;
 `;
 
 const Label = styled.label`
   display: inline-block;
   width: 100px;
+  text-align: right;
+  padding-right: 15px;
 `;
 
 const Input = styled.input.attrs({
@@ -20,6 +23,20 @@ const Input = styled.input.attrs({
 })`
   padding: 5px;
   border-radius: 4px;
+  border: 1px solid #ccc;
+  flex: 1;
+`;
+
+const Select = styled.select`
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+`;
+
+const FormItem = styled.div`
+  margin-bottom: 20px;
+  width: 500px;
+  display: flex;
 `;
 
 class CreateDialog extends React.Component {
@@ -47,7 +64,7 @@ class CreateDialog extends React.Component {
     this.setState({
       settings: {
         ...this.props.initialData,
-        url: `${uri.host}${uri.port?`:${uri.port}`:""}${uri.path}`,
+        url: `${uri.host}${uri.port ? `:${uri.port}` : ""}${uri.path}`,
         urlPrefix: uri.protocol + "://"
       }
     });
@@ -59,24 +76,24 @@ class CreateDialog extends React.Component {
         title={this.state.settings._id ? "Edit Asset" : "Create new Asset"}
       >
         <form>
-          <div>
-            <Label for="description">Description:</Label>
+          <FormItem>
+            <Label for="description">Description</Label>
             <Input
               type="text"
               id="description"
               value={this.state.settings.description}
               onChange={this.handleChange("description")}
             />
-          </div>
-          <div>
-            <Label for="url">URL:</Label>
-            <select
+          </FormItem>
+          <FormItem>
+            <Label for="url">URL</Label>
+            <Select
               onChange={this.handleChange("urlPrefix")}
               value={this.state.settings.urlPrefix}
             >
               <option value="https://">https://</option>
               <option value="http://">http://</option>
-            </select>
+            </Select>
             <Input
               type="text"
               autoCapitalize="none"
@@ -84,14 +101,16 @@ class CreateDialog extends React.Component {
               value={this.state.settings.url}
               onChange={this.handleChange("url")}
             />
-          </div>
-          <Label for="time">Time (ms):</Label>
-          <Input
-            type="text"
-            id="time"
-            value={this.state.settings.time_ms}
-            onChange={this.handleChange("time_ms")}
-          />
+          </FormItem>
+          <FormItem>
+            <Label for="time">Time (ms)</Label>
+            <Input
+              type="text"
+              id="time"
+              value={this.state.settings.time_ms}
+              onChange={this.handleChange("time_ms")}
+            />
+          </FormItem>
         </form>
         <Flex>
           <Button onClick={this.onConfirm}>OK</Button>

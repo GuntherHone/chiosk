@@ -14,15 +14,20 @@ const Background = styled.div`
 const ModalContent = styled.div`
   background-color: #fefefe;
   margin: 15% auto;
-  padding: 20px;
+  padding: 0px;
   width: 80%;
   border-radius: 4px;
+`;
+
+const Title = styled.h2`
+  border-bottom: 1px solid #ccc;
+  padding: 15px;
 `;
 
 export default props => (
   <Background>
     <ModalContent>
-      <h2>{props.title}</h2>
+      <Title>{props.title}</Title>
       {props.children}
     </ModalContent>
   </Background>

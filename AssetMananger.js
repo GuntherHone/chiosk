@@ -55,9 +55,11 @@ module.exports = function AssetMananger(assetFile, autocreate = true) {
     },
 
     reorder: (source, destination) => {
-      let [asset] = assets.splice(source,1);
-      assets.splice(destination,0,asset);
+      let [asset] = assets.splice(source, 1);
+      assets.splice(destination, 0, asset);
       persistData();
-    }
+    },
+
+    getId: _ => uniqid()
   };
 };

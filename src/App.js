@@ -101,16 +101,35 @@ class App extends Component {
   };
 
   doCreateOrUpdate = asset => {
-    fetch(asset._id ? `/api/update/${asset._id}` : `/api/create`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(asset)
-    })
-      .then(this.checkResponse)
-      .then(this.getAssets)
-      .catch(({ status, message }) =>
-        this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
-      );
+    if (asset.hasOwnProperty("filesToUpload")) {
+      Promise.all(
+        [...asset.filesToUpload].map(file =>
+          fetch(`/api/uploadFile/${file.name}`, {
+            method: "POST",
+            body: file
+          })
+        )
+      )
+        .then(responses => Promise.all(responses.map(this.checkResponse)))
+        .then(files => {
+          console.log(JSON.stringify(asset, null, 2));
+          console.log(JSON.stringify(files, null, 2));
+        })
+        .catch(({ status, message }) =>
+          this.showError(`doUpload(${JSON.stringify(asset)})`, status, message)
+        );
+    } else {
+      fetch(asset._id ? `/api/update/${asset._id}` : `/api/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(asset)
+      })
+        .then(this.checkResponse)
+        .then(this.getAssets)
+        .catch(({ status, message }) =>
+          this.showError(`doCreate(${JSON.stringify(asset)})`, status, message)
+        );
+    }
     this.setState({ showAddDialog: false });
   };
 

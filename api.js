@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { ipcMain } = require("electron");
+const fs = require("fs");
 
 function sendOK(res) {
   res.send(JSON.stringify({ status: "ok" }));
@@ -118,6 +119,26 @@ router.post("/toggledevtools", (req, res) => {
   display.openDevTools();
 
   sendOK(res);
-})
+});
+
+router.post("/uploadFile/:filename?", (req, res) => {
+  console.log(`API: uploadFile ${req.params.filename}`);
+  const [assetManager, display] = getControlsFromApp(req);
+
+  const filename =
+    assetManager.getId() + req.params.filename.match(/.[0-9a-z]+$/i)[0];
+
+  req
+    .pipe(fs.createWriteStream(`./upload/${filename}`))
+    .on("close", () =>
+      res.send(
+        JSON.stringify({
+          status: "ok",
+          filename,
+          originalFilename: req.params.filename
+        })
+      )
+    );
+});
 
 module.exports = router;

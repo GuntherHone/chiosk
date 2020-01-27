@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "electron .",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "build_and_run": "react-scripts build && electron ."
   }
 }
